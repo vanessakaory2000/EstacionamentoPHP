@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Estacionamento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="max-w-6xl mx-auto p-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h1 class="text-4xl font-bold text-gray-800">Controle de Estacionamento</h1>
+            <p class="text-gray-600 mt-2">Gerencie entradas, saídas e relatórios</p>
+        </div>
+
+        <!-- Navegação -->
+        <div class="flex gap-4 mb-8">
+            <button 
+                onclick="showSection('entry')" 
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Registrar Entrada
+            </button>
+            <button 
+                onclick="showSection('exit')" 
+                class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded">
+                Registrar Saída
+            </button>
+            <button 
+                onclick="showSection('report')" 
+                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Ver Relatório
+            </button>
+        </div>
+
+        <!-- Seção Entrada -->
+        <div id="entry" class="hidden bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">Registrar Entrada de Veículo</h2>
+            <form id="entryForm" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Placa do Veículo</label>
+                    <input 
+                        type="text" 
+                        id="plate" 
+                        name="plate" 
+                        placeholder="Ex: ABC1234" 
+                        class="w-full border rounded px-3 py-2"
+                        required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Tipo de Veículo</label>
+                    <select id="vehicleType" name="vehicleType" class="w-full border rounded px-3 py-2" required>
+                        <option value="">Selecione...</option>
+                        <option value="carro">Carro (R$ 5/h)</option>
+                        <option value="moto">Moto (R$ 3/h)</option>
+                        <option value="caminhao">Caminhão (R$ 10/h)</option>
+                    </select>
+                </div>
+                <button 
+                    type="submit" 
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Registrar Entrada
+                </button>
+            </form>
+        </div>
+
+        <!-- Seção Saída -->
+        <div id="exit" class="hidden bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">Registrar Saída de Veículo</h2>
+            <form id="exitForm" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">ID da Sessão</label>
+                    <input 
+                        type="number" 
+                        id="parkingSessionId" 
+                        name="parkingSessionId" 
+                        placeholder="Ex: 1" 
+                        class="w-full border rounded px-3 py-2"
+                        required>
+                </div>
+                <button 
+                    type="submit" 
+                    class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded">
+                    Registrar Saída
+                </button>
+            </form>
+        </div>
+
+        <!-- Seção Relatório -->
+        <div id="report" class="hidden bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">Relatório de Estacionamento</h2>
+            <button 
+                onclick="loadReport()" 
+                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4">
+                Carregar Relatório
+            </button>
+            <div id="reportContent"></div>
+        </div>
+    </div>
+
+    <script>
+        function showSection(section) {
+            document.getElementById('entry').classList.add('hidden');
+            document.getElementById('exit').classList.add('hidden');
+            document.getElementById('report').classList.add('hidden');
+            document.getElementById(section).classList.remove('hidden');
+        }
+
+        document.getElementById('entryForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const plate = document.getElementById('plate').value;
+            const vehicleType = document.getElementById('vehicleType').value;
+
+            try {
+                const response = await fetch('api/entry', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ plate, vehicleType })
+                });
+
+                if (response.ok) {
+                    Swal.fire('Sucesso!', 'Entrada registrada.', 'success');
+                    document.getElementById('entryForm').reset();
+                } else {
+                    Swal.fire('Erro!', 'Falha ao registrar entrada.', 'error');
+                }
+            } catch (error) {
+                Swal.fire('Erro!', error.message, 'error');
+            }
+        });
+
+        document.getElementById('exitForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const parkingSessionId = document.getElementById('parkingSessionId').value;
+
+            try {
+                const response = await fetch('api/exit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ parkingSessionId })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    Swal.fire('Sucesso!', `Saída registrada. Total: R$ ${data.amount.toFixed(2)}`, 'success');
+                    document.getElementById('exitForm').reset();
+                } else {
+                    Swal.fire('Erro!', 'Falha ao registrar saída.', 'error');
+                }
+            } catch (error) {
+                Swal.fire('Erro!', error.message, 'error');
+            }
+        });
+
+        async function loadReport() {
+            try {
+                const response = await fetch('api/report');
+                const reportData = await response.json();
+
+                let html = `
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="bg-blue-100 p-4 rounded">
+                            <p class="text-gray-600">Total de Veículos</p>
+                            <p class="text-2xl font-bold">${reportData.totalVehicles}</p>
+                        </div>
+                        <div class="bg-green-100 p-4 rounded">
+                            <p class="text-gray-600">Faturamento Total</p>
+                            <p class="text-2xl font-bold">R$ ${reportData.totalRevenue.toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <table class="w-full border-collapse border border-gray-300 mb-4">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="border p-3 text-left">Tipo</th>
+                                <th class="border p-3 text-left">Quantidade</th>
+                                <th class="border p-3 text-left">Faturamento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                for (const [type, info] of Object.entries(reportData.byType)) {
+                    html += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="border p-3">${type.charAt(0).toUpperCase() + type.slice(1)}</td>
+                            <td class="border p-3">${info.count}</td>
+                            <td class="border p-3">R$ ${info.revenue.toFixed(2)}</td>
+                        </tr>
+                    `;
+                }
+
+                html += `
+                        </tbody>
+                    </table>
+                    <button 
+                        onclick="window.location='api/report?format=pdf'" 
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Exportar PDF
+                    </button>
+                `;
+
+                document.getElementById('reportContent').innerHTML = html;
+            } catch (error) {
+                Swal.fire('Erro!', error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

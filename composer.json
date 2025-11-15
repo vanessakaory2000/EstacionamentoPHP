@@ -1,0 +1,23 @@
+{
+    "name": "vanessakaory2000/parking-control",
+    "description": "Controle de estacionamento simples com PHP, SQLite e princípios SOLID.",
+    "type": "project",
+    "require": {
+        "php": "^8.2",
+        "ext-pdo": "*",
+        "mpdf/mpdf": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Application\\": "Application/",
+            "Domain\\": "Domain/",
+            "Infra\\": "Infra/"
+        }
+    },
+    "scripts": {
+        "start": "php -S 127.0.0.1:8000 -t public"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

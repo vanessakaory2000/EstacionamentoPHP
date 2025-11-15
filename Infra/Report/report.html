@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Estacionamento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-8">
+        <h1 class="text-3xl font-bold mb-6">Relatório de Estacionamento</h1>
+
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="bg-blue-100 p-4 rounded">
+                <p class="text-gray-600">Total de Veículos</p>
+                <p class="text-2xl font-bold"><?php echo $reportData['totalVehicles']; ?></p>
+            </div>
+            <div class="bg-green-100 p-4 rounded">
+                <p class="text-gray-600">Faturamento Total</p>
+                <p class="text-2xl font-bold">R$ <?php echo number_format($reportData['totalRevenue'], 2, ',', '.'); ?></p>
+            </div>
+        </div>
+
+        <table class="w-full border-collapse border border-gray-300 mb-8">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="border p-3 text-left">Tipo de Veículo</th>
+                    <th class="border p-3 text-left">Quantidade</th>
+                    <th class="border p-3 text-left">Faturamento</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($reportData['byType'] as $type => $info): ?>
+                <tr class="hover:bg-gray-50">
+                    <td class="border p-3"><?php echo ucfirst($type); ?></td>
+                    <td class="border p-3"><?php echo $info['count']; ?></td>
+                    <td class="border p-3">R$ <?php echo number_format($info['revenue'], 2, ',', '.'); ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+
+        <button 
+            onclick="window.location='?format=pdf'" 
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Exportar para PDF
+        </button>
+    </div>
+</body>
+</html>
