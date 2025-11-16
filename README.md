@@ -1,7 +1,8 @@
 # EstacionamentoPHP
 
 Aplicação feita como atividade avaliativa com objetivo de criar um código seguindo normas e boas práticas de programação.<br>
-Projeto feito para matéria de DESIGN PATTERNS E CLEAN CODE ministrada pelo professor Valdir e pela universidade UNIMAR
+Projeto feito para matéria de DESIGN PATTERNS E CLEAN CODE ministrada pelo professor Valdir e pela universidade UNIMAR <br>
+(Universidade de Marília)
 
 ## Requisitos
 
