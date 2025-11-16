@@ -9,15 +9,20 @@ use Domain\Model\ParkingSession;
 use Infra\Connection;
 use PDO;
 use DateTimeImmutable;
+use DateTimeZone;
 use InvalidArgumentException;
 
 class ParkingSessionRepository implements ParkingSessionRepositoryInterface
 {
     private PDO $pdo;
+    private DateTimeZone $timezone;
+
+    private const TIMEZONE = 'America/Sao_Paulo';
 
     public function __construct(Connection $connection)
     {
         $this->pdo = $connection->connect();
+        $this->timezone = new DateTimeZone(self::TIMEZONE);
     }
 
     public function save(ParkingSession $session): void
@@ -40,8 +45,8 @@ class ParkingSessionRepository implements ParkingSessionRepositoryInterface
         $stmt->execute([
             ':plate' => $session->getPlate(),
             ':vehicle_type' => $session->getVehicleType(),
-            ':entry_time' => $session->getEntryTime()->format('Y-m-d H:i:s'),
-            ':exit_time' => $session->getExitTime()?->format('Y-m-d H:i:s'),
+            ':entry_time' => $session->getEntryTime()->setTimezone($this->timezone)->format('Y-m-d H:i:s'),
+            ':exit_time' => $session->getExitTime()?->setTimezone($this->timezone)->format('Y-m-d H:i:s'),
             ':amount' => $session->getAmount(),
         ]);
 
@@ -63,7 +68,7 @@ class ParkingSessionRepository implements ParkingSessionRepositoryInterface
         }
 
         $stmt->execute([
-            ':exit_time' => $session->getExitTime()?->format('Y-m-d H:i:s'),
+            ':exit_time' => $session->getExitTime()?->setTimezone($this->timezone)->format('Y-m-d H:i:s'),
             ':amount' => $session->getAmount(),
             ':id' => $id,
         ]);
@@ -126,13 +131,14 @@ class ParkingSessionRepository implements ParkingSessionRepositoryInterface
 
     private function mapRowToEntity(array $row): ParkingSession
     {
-        $exitTime = $row['exit_time'] ? new DateTimeImmutable($row['exit_time']) : null;
+        $entryTime = new DateTimeImmutable($row['entry_time'], $this->timezone);
+        $exitTime = $row['exit_time'] ? new DateTimeImmutable($row['exit_time'], $this->timezone) : null;
         $amount = $row['amount'] !== null ? (float) $row['amount'] : null;
 
         return new ParkingSession(
             plate: $row['plate'],
             vehicleType: $row['vehicle_type'],
-            entryTime: new DateTimeImmutable($row['entry_time']),
+            entryTime: $entryTime,
             exitTime: $exitTime,
             amount: $amount,
             id: (int) $row['id']

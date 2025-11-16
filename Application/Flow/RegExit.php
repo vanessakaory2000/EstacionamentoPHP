@@ -9,6 +9,7 @@ use Application\DTO\ParkingSessionDTO;
 use Domain\Interfaces\ParkingSessionRepositoryInterface;
 use Domain\Interfaces\PricingStrategyInterface;
 use DateTimeImmutable;
+use DateTimeZone;
 use InvalidArgumentException;
 
 class RegExit
@@ -17,7 +18,13 @@ class RegExit
     public function __construct(
         private readonly ParkingSessionRepositoryInterface $repository,
         private readonly array $pricingStrategies
-    ) {}
+    ) {
+        $this->timezone = new DateTimeZone(self::TIMEZONE);
+    }
+
+    private const TIMEZONE = 'America/Sao_Paulo';
+
+    private DateTimeZone $timezone;
 
     /** @return array{session: ParkingSessionDTO, hours: int} */
     public function execute(RegisterExitDTO $dto): array
@@ -36,7 +43,7 @@ class RegExit
             throw new InvalidArgumentException('Sessão não encontrada.');
         }
 
-        $exitTime = new DateTimeImmutable($dto->exitTime);
+        $exitTime = new DateTimeImmutable($dto->exitTime, $this->timezone);
         $session->setExitTime($exitTime);
 
         $hours = $this->calculateHours($session->getEntryTime(), $exitTime);

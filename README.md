@@ -8,6 +8,10 @@ Projeto feito para matéria de DESIGN PATTERNS E CLEAN CODE ministrada pelo prof
 - PHP
 - Composer
 
+## Tip
+
+- Atualizar php.ini, descomentando a linha `extension=gd` para permitir a instalação do pacote de gerar pdf
+
 ## Instalação
 
 ```bash

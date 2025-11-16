@@ -11,17 +11,25 @@ use Application\Flow\ExportReportPdf;
 use Application\Flow\ListOpenSessions;
 use Application\DTO\RegisterEntryDTO;
 use Application\DTO\RegisterExitDTO;
+use DateTimeImmutable;
+use DateTimeZone;
 use InvalidArgumentException;
 
 class WebController
 {
+    private const TIMEZONE = 'America/Sao_Paulo';
+
+    private DateTimeZone $timezone;
+
     public function __construct(
         private readonly RegEntry $regEntry,
         private readonly RegExit $regExit,
         private readonly GetReport $getReport,
         private readonly ExportReportPdf $exportPdf,
         private readonly ListOpenSessions $listOpenSessions
-    ) {}
+    ) {
+        $this->timezone = new DateTimeZone(self::TIMEZONE);
+    }
 
     public function handleEntry(): void
     {
@@ -36,7 +44,7 @@ class WebController
             $dto = new RegisterEntryDTO(
                 plate: $data['plate'] ?? '',
                 vehicleType: $data['vehicleType'] ?? '',
-                entryTime: date('Y-m-d H:i:s')
+                entryTime: $this->nowString()
             );
 
             $result = $this->regEntry->execute($dto);
@@ -69,7 +77,7 @@ class WebController
             $dto = new RegisterExitDTO(
                 parkingSessionId: isset($data['parkingSessionId']) ? (int) $data['parkingSessionId'] : null,
                 plate: $plate,
-                exitTime: date('Y-m-d H:i:s')
+                exitTime: $this->nowString()
             );
 
             if ($dto->parkingSessionId === null && $dto->plate === null) {
@@ -166,5 +174,10 @@ class WebController
 
         header('Content-Type: application/javascript');
         readfile($scriptPath);
+    }
+
+    private function nowString(): string
+    {
+        return (new DateTimeImmutable('now', $this->timezone))->format('Y-m-d H:i:s');
     }
 }

@@ -9,13 +9,20 @@ use Application\DTO\ParkingSessionDTO;
 use Domain\Interfaces\ParkingSessionRepositoryInterface;
 use Domain\Model\ParkingSession;
 use DateTimeImmutable;
+use DateTimeZone;
 use InvalidArgumentException;
 
 class RegEntry
 {
+    private const TIMEZONE = 'America/Sao_Paulo';
+
+    private DateTimeZone $timezone;
+
     public function __construct(
         private readonly ParkingSessionRepositoryInterface $repository
-    ) {}
+    ) {
+        $this->timezone = new DateTimeZone(self::TIMEZONE);
+    }
 
     /** @return ParkingSessionDTO */
     public function execute(RegisterEntryDTO $dto): ParkingSessionDTO
@@ -27,7 +34,7 @@ class RegEntry
         $session = new ParkingSession(
             plate: $dto->plate,
             vehicleType: $dto->vehicleType,
-            entryTime: new DateTimeImmutable($dto->entryTime)
+            entryTime: new DateTimeImmutable($dto->entryTime, $this->timezone)
         );
 
         $this->repository->save($session);
